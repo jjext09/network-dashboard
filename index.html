@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+<meta charset="UTF-8">
+<title>Network Monitoring Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+<h1>Network Monitoring Dashboard</h1>
+<p>ระบบตรวจสอบ IP Network</p>
+</header>
+
+<!-- ปุ่มเลือกตึก -->
+<div id="building-buttons"></div>
+
+<!-- ตารางข้อมูล -->
+<div id="content"></div>
+
+<script>
+
+fetch('network_data.json')
+.then(response => response.json())
+.then(data => {
+
+    const buttonContainer = document.getElementById("building-buttons");
+    const content = document.getElementById("content");
+
+    const buildings = data.devices;
+
+    for (const building in buildings){
+
+        const btn = document.createElement("button");
+        btn.innerText = building;
+        btn.className = "building-btn";
+
+        btn.onclick = () => {
+            showBuilding(building);
+        };
+
+        buttonContainer.appendChild(btn);
+    }
+
+    function showBuilding(building){
+
+        content.innerHTML = "";
+
+        const section = document.createElement("div");
+        section.className = "building-section";
+
+        const title = document.createElement("h2");
+        title.innerText = "ตึก : " + building;
+
+        const table = document.createElement("table");
+
+        table.innerHTML = `
+        <thead>
+        <tr>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Computer Name</th>
+            <th>Switch IP</th>
+            <th>Port</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector("tbody");
+
+        buildings[building].forEach(device => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${device.ip || "-"}</td>
+                <td>${device.mac || "-"}</td>
+                <td>${device.computer_name || "-"}</td>
+                <td>${device.switch_ip || "-"}</td>
+                <td>${device.port || "-"}</td>
+            `;
+
+            tbody.appendChild(row);
+
+        });
+
+        section.appendChild(title);
+        section.appendChild(table);
+        content.appendChild(section);
+    }
+
+})
+.catch(error => {
+    console.error("Error loading JSON:", error);
+});
+
+</script>
+
+</body>
+</html>
